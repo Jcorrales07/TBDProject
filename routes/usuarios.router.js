@@ -14,9 +14,6 @@ const router = express.Router()
 // Pagina de bienvenida y pues funciones generales
 
 
-
-
-
 // conseguir todos los usuarios
 router.get('/', async (req, res) => {
     const query = {
@@ -40,7 +37,7 @@ router.get('/:idUsuario', async (req, res) => {
     const { idUsuario } = req.params
 
     const query = {
-        text: `SELECT * FROM usuario WHERE nombre_usuario = '${idUsuario}'`,
+        text: `SELECT * FROM usuario WHERE username = '${idUsuario}'`,
     }
 
     try {
@@ -57,12 +54,12 @@ router.get('/:idUsuario', async (req, res) => {
 // crear usuario
 router.post('/crear-usuario', async (req, res) => {
 
-    const { id_usuario, nombre, apellido, email, nombre_usuario } = req.body
+    const { username, nombre, apellido, email, clave } = req.body
 
     const query = {
-        text: `INSERT INTO usuario(id_usuario, nombre, apellido, email, nombre_usuario)
-                    VALUES($1, $2, $3, $4, $5)`,
-        values: [id_usuario, nombre, apellido, email, nombre_usuario]
+        text: `INSERT INTO usuario(username, nombre, apellido, email, clave)
+                    VALUES($1, $2, $3, $4)`,
+        values: [username, nombre, apellido, email, clave]
     }
 
     try {   
@@ -76,6 +73,30 @@ router.post('/crear-usuario', async (req, res) => {
         console.log('Uno de los campos esta repetido compa')
     
     }
+
+})
+
+
+router.patch('/:username', async (req, res) => {
+    const { username } = req.params
+    const body = req.body
+
+    res.json({
+        message: 'Usuario actualizado',
+        data: body,
+        username
+    })
+
+})
+
+router.delete('/:username', async (req, res) => {
+    const { username } = req.params
+    const body = req.body
+
+    res.json({
+        message: 'Usuario eliminado',
+        username
+    })
 
 })
 

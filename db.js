@@ -8,7 +8,7 @@ const config = {
     host: 'localhost',
     port: 5432,
     password: 'HxMnBmP9qgbinY',
-    database: 'proyecto_inventario'
+    database: 'inventario_proyecto'
 };
 
 // instancia y conexion de la db

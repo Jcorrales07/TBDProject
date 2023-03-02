@@ -1,0 +1,5 @@
+INSERT INTO public.usuario(
+	username, nombre, apellido, email, clave)
+	VALUES ("jcorralesss", "Joe", "Corrales", "corralesjoe07@gmail.com", "77721459"),
+		("icorrales", "Ian", "Corrales", "iancorrales05@gmail.com", "1234567"),
+		("dlara", "David", "Lara", "davidlara@gmail.com", "7654321");
