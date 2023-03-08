@@ -1,4 +1,5 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const routerApi = require('./routes/index')
 
 const app = express();
@@ -12,7 +13,8 @@ const pool = require('./db');
 //middleware
 app.use(cors())
 app.use(express.json()) //req.body
-
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
 
 

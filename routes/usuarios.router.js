@@ -3,6 +3,8 @@ const pool = require('../db');
 
 const router = express.Router();
 
+const { sp_usuario_read } = require('../controllers/usuarios.controller');
+
 // LOGIN
 // GET : conseguir un usuario en especifico
 // POST : crear un usuario
@@ -29,22 +31,36 @@ router.get('/', async (req, res) => {
 router.get('/:username', async (req, res) => {
     const { username } = req.params;
 
+    
+    const result = 'result'
+    console.log(`username: '${username}' y result: '${result}'`);        
     const query = {
-        text: `SELECT * FROM usuario WHERE username = '${idUsuario}'`,
+        text: `SELECT * FROM sp_usuario_read('${username}')`,
+            // text: `
+            // BEGIN;
+            //     CALL sp_usuario_read('${username}', 'result');
+            //     FETCH ALL IN "result";
+            // END;    
+            // `,
+            // text: `SELECT * FROM usuario WHERE username = $1`,
+            // values: [username],
     };
 
     try {
-        let dbRes = await pool.query(query);
+        
+        let dbRes = await pool.query(query)
         res.json(dbRes.rows);
+
     } catch (error) {}
+
 });
 
 // crear usuario
 router.post('/registrarse', async (req, res) => {
-    const { username, nombre, apellido, email, clave } = req.body;
+    const { username, nombre, apellido, email, clave, usuario_creador } = req.body;
 
     const query = {
-        text: `CALL sp_create_usuario('${username}', '${nombre}', '${apellido}', '${email}', '${clave}')`,
+        text: `CALL sp_usuario_create('${username}', '${nombre}', '${apellido}', '${email}', '${clave}', ${usuario_creador})`,
     };
 
     try {
@@ -57,7 +73,7 @@ router.post('/registrarse', async (req, res) => {
 });
 
 router.patch('/:username', async (req, res) => {
-    const { username } = req.params;
+    const { username, nombre, apellido, email, clave, usuario_modificador } = req.params;
     const body = req.body;
 
     res.json({
@@ -70,6 +86,16 @@ router.patch('/:username', async (req, res) => {
 router.delete('/:username', async (req, res) => {
     const { username } = req.params;
     const body = req.body;
+
+    const query = {
+        text: `CALL sp_usuario_delete('${username}')`,
+    };
+
+    try {
+
+        let dbRes = await pool.query(query)
+
+    } catch (error) {}
 
     res.json({
         message: 'Usuario eliminado',
