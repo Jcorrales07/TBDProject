@@ -55,7 +55,8 @@ LANGUAGE SQL
 BEGIN ATOMIC
 
     UPDATE usuario
-	SET nombre = sp_nombre,
+	SET 
+		nombre = sp_nombre,
 		apellido = sp_apellido,
 		email = sp_email,
 		clave = sp_clave,

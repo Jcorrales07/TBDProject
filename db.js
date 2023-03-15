@@ -15,3 +15,17 @@ const config = {
 const pool = new Pool(config)
 
 module.exports = pool
+
+
+
+// CREATE OR REPLACE FUNCTION fn_insertar_kardex()
+// RETURNS TRIGGER
+// LANGUAGE PLPGSQL
+// AS $$
+// BEGIN
+	
+// 	-- Logic
+// 	INSERT INTO kardex 
+
+// END;
+// $$

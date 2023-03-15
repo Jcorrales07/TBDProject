@@ -1,17 +1,8 @@
 const express = require('express');
+const router = express.Router();
 const pool = require('../db');
 
-const router = express.Router();
-
 const { sp_usuario_read } = require('../controllers/usuarios.controller');
-
-// LOGIN
-// GET : conseguir un usuario en especifico
-// POST : crear un usuario
-// UPDATE : actualizar un usuario
-// DELETE : eliminar un usuario
-
-// Pagina de bienvenida y pues funciones generales
 
 // conseguir todos los usuarios
 router.get('/', async (req, res) => {
@@ -20,8 +11,11 @@ router.get('/', async (req, res) => {
     };
 
     try {
-        const allUsuarios = await pool.query(query);
-        res.json(allUsuarios.rows);
+        const dbRes = await pool.query(query);
+        res.json({
+            message: 'GET /usuarios',
+            usuarios: dbRes.rows,
+        });
     } catch (error) {
         console.error(error);
     }
@@ -31,76 +25,99 @@ router.get('/', async (req, res) => {
 router.get('/:username', async (req, res) => {
     const { username } = req.params;
 
-    
-    const result = 'result'
-    console.log(`username: '${username}' y result: '${result}'`);        
+    // const query = {
+    //     text: `SELECT * FROM fn_usuario_read('${username}')`,
+    //     // text: `
+    //     // BEGIN;
+    //     //     CALL sp_usuario_read('${username}', 'result');
+    //     //     FETCH ALL IN "result";
+    //     // END;
+    //     // `,
+    //     // text: `SELECT * FROM usuario WHERE username = $1`,
+    //     // values: [username],
+    // };
+
     const query = {
-        text: `SELECT * FROM sp_usuario_read('${username}')`,
-            // text: `
-            // BEGIN;
-            //     CALL sp_usuario_read('${username}', 'result');
-            //     FETCH ALL IN "result";
-            // END;    
-            // `,
-            // text: `SELECT * FROM usuario WHERE username = $1`,
-            // values: [username],
+        text: `SELECT * FROM fn_usuario_read('${username}')`,
     };
 
     try {
-        
-        let dbRes = await pool.query(query)
-        res.json(dbRes.rows);
+        let dbRes = await pool.query(query);
 
-    } catch (error) {}
-
+        res.json({
+            message: 'GET /usuarios/:username',
+            usuario: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 // crear usuario
 router.post('/registrarse', async (req, res) => {
-    const { username, nombre, apellido, email, clave, usuario_creador } = req.body;
+    const { username, nombre, apellido, email, clave, usuario_creador } =
+        req.body;
 
     const query = {
-        text: `CALL sp_usuario_create('${username}', '${nombre}', '${apellido}', '${email}', '${clave}', ${usuario_creador})`,
+        text: `CALL sp_usuario_create('${username}', '${nombre}', '${apellido}', '${email}', '${clave}', '${usuario_creador}')`,
     };
 
     try {
-        const nuevoUsuario = await pool.query(query);
+        const dbRes = await pool.query(query);
 
-        res.json(nuevoUsuario.rows);
+        res.json({
+            message: 'POST /usuarios',
+            usuario: dbRes.rows,
+        });
     } catch (error) {
-        console.log('Uno de los campos esta repetido compa');
+        console.log(error);
     }
 });
 
 router.patch('/:username', async (req, res) => {
-    const { username, nombre, apellido, email, clave, usuario_modificador } = req.params;
-    const body = req.body;
+    const { username } = req.params;
 
-    res.json({
-        message: 'Usuario actualizado',
-        data: body,
-        username,
-    });
+    const { nombre, apellido, email, clave, usuario_modificador } = req.body;
+
+    console.log(
+        `'${username}', '${nombre}', '${apellido}', '${email}', '${clave}', '${usuario_modificador}'`
+    );
+
+    const query = {
+        text: `CALL sp_usuario_update('${username}', '${nombre}', '${apellido}', '${email}', '${clave}', '${usuario_modificador}')`,
+    };
+
+    try {
+        let dbRes = await pool.query(query);
+
+        res.json({
+            message: 'PATCH /usuarios/:username',
+            data: req.body,
+            db: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 router.delete('/:username', async (req, res) => {
     const { username } = req.params;
-    const body = req.body;
 
     const query = {
         text: `CALL sp_usuario_delete('${username}')`,
     };
 
     try {
+        let dbRes = await pool.query(query);
 
-        let dbRes = await pool.query(query)
-
-    } catch (error) {}
-
-    res.json({
-        message: 'Usuario eliminado',
-        username,
-    });
+        res.json({
+            message: 'DELETE /usuarios/:username',
+            username,
+            db: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 module.exports = router;

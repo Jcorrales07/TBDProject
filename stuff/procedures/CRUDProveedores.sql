@@ -32,7 +32,7 @@ BEGIN
 END
 $BODY$;
 
-CREATE OR REPLACE FUNCTION sp_proveedor_read(sp_id_producto integer)
+CREATE OR REPLACE FUNCTION sp_proveedor_read(sp_id_proveedor integer)
 RETURNS TABLE(id_proveedor integer, nombre varchar, direccion varchar, telefono varchar, nombre_contacto_principal varchar, estado smallint, usuario_creador varchar, usuario_modificador varchar, fecha_creacion TIMESTAMP, fecha_modificacion TIMESTAMP)
 LANGUAGE 'plpgsql'
 

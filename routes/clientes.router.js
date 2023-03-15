@@ -1,64 +1,113 @@
-const express = require('express')
-const router = express.Router()
-
-
-//CREATE
-router.post('/registrar-cliente', (req, res) => {
-    
-        // No se si estos son los campos de la tabla cliente
-        const campos  = req.body
-
-        res.json({ message: 'POST /clientes', data: campos })
-
-    
-})
-
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
 
 // READ
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+    const query = {
+        text: `SELECT * FROM cliente`,
+    };
 
-    res.json({ message: 'GET /clientes' })
-
-})
+    try {
+        const dbRes = await pool.query(query);
+        res.json({
+            message: 'GET /clientes',
+            usuarios: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
+});
 
 // READ ESPECIFICO
-router.get('/:idCliente', (req, res) => {
-    const { idCliente } = req.params
+router.get('/:idCliente', async (req, res) => {
+    const { idCliente } = req.params;
 
-    res.json({
-        message: 'GET /clientes/:idCliente',
-        idCliente
-    })
+    const query = {
+        text: `SELECT * FROM fn_cliente_read(${idCliente})`,
+    };
 
-})
-
-// UPDATE ESPECIFICO
-router.patch('/:idCliente', (req, res) => {
-    const { idCliente } = req.params
-
-    const body = req.body
-
-    res.json({
-        message: 'PATCH /clientes/:idCliente',
-        data: body,
-        idCliente
-
-    })
-})
-
-// DELETE ESPECIFICO
-router.delete('/:idCliente', (req, res) => {
-
-        const { idCliente } = req.params
+    try {
+        let dbRes = await pool.query(query);
 
         res.json({
-            message: "cliente eliminado",
-            idCliente
-        })
+            message: 'GET /clientes/:idCliente',
+            cliente: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
+});
 
+//CREATE
+router.post('/registrar-cliente', async (req, res) => {
+    const { nombre, apellido, usuario_creador } = req.body;
 
-})
+    const query = {
+        text: `CALL sp_cliente_create('${nombre}', '${apellido}', '${usuario_creador}')`,
+    };
 
+    try {
+        const dbRes = await pool.query(query);
 
+        res.json({
+            message: 'POST /clientes',
+            usuario: dbRes.rows,
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
 
-module.exports = router
+// UPDATE ESPECIFICO
+router.patch('/:idCliente', async (req, res) => {
+    const { idCliente } = req.params;
+
+    const { nombre, apellido, usuario_modificador } = req.body;
+
+    console.log(`'${nombre}', '${apellido}', '${usuario_modificador}'`);
+
+    const query = {
+        text: `CALL sp_cliente_update(${idCliente}, ${nombre}, '${apellido}', '${usuario_modificador}')`,
+    };
+
+    try {
+        let dbRes = await pool.query(query);
+
+        res.json({
+            message: 'PATCH /clientes/:idCliente',
+            data: req.body,
+            db: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+// DELETE ESPECIFICO
+router.delete('/:idCliente', async (req, res) => {
+    const { idCliente } = req.params;
+
+    const query = {
+        text: `CALL sp_cliente_delete(${idCliente})`,
+    };
+
+    try {
+        let dbRes = await pool.query(query);
+
+        res.json({
+            message: 'DELETE /clientes/:idCliente',
+            idCliente,
+            db: dbRes.rows,
+        });
+    } catch (error) {
+        console.error(error);
+    }
+
+    res.json({
+        message: 'cliente eliminado',
+        idCliente,
+    });
+});
+
+module.exports = router;
